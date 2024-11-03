@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio</title>
+    <link rel="stylesheet" href="style.css">
+    
+
+
+
+</head>
+<body>
+
+    <div class="content">
+         <!-- Imagem no topo da página ocupando toda a largura -->
+    <img src="img/Burg.jpeg" alt="Imagem no topo" class="top-image">
+
+        <h1>Cardápio Lanchonete Adriano</h1>
+        <ul class="menu-list">
+            <li class="menu-item">
+                
+                <span>Hamburguer - R$30</span>
+                <button class="add-button" onclick="adicionarAoPedido('Hamburguer', 30)">Adicionar</button>
+            </li>
+            <li class="menu-item">
+               
+                <span>Kafta - R$35</span>
+                <button class="add-button" onclick="adicionarAoPedido('Kafta', 35)">Adicionar</button>
+            </li>
+            <li class="menu-item">
+                
+                <span>Batata - R$20</span>
+                <button class="add-button" onclick="adicionarAoPedido('Batata', 20)">Adicionar</button>
+            </li>
+        </ul>
+        <div class="pedido-container">
+            <h2>Seu Pedido</h2>
+            <ul id="pedido"></ul>
+            <button class="send-button" onclick="enviarPedido()">Enviar Pedido pelo WhatsApp</button>
+        </div>
+    </div>
+
+    <script>
+        var itensPedido = [];
+
+        function adicionarAoPedido(nome, preco) {
+            var itemExistente = itensPedido.find(item => item.nome === nome);
+            
+            if (itemExistente) {
+                itemExistente.quantidade++;
+            } else {
+                itensPedido.push({
+                    nome: nome,
+                    preco: preco,
+                    quantidade: 1
+                });
+            }
+
+            atualizarPedido();
+        }
+
+        function removerItem(nome) {
+            itensPedido = itensPedido.filter(item => item.nome !== nome);
+            atualizarPedido();
+        }
+
+        function alterarQuantidade(nome, valor) {
+            var item = itensPedido.find(item => item.nome === nome);
+            if (item) {
+                item.quantidade += valor;
+                if (item.quantidade <= 0) {
+                    removerItem(nome);
+                }
+                atualizarPedido();
+            }
+        }
+
+        function atualizarPedido() {
+            var listaPedido = document.getElementById('pedido');
+            listaPedido.innerHTML = '';
+        
+            itensPedido.forEach(function(item) {
+                var li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${item.nome} - R$${item.preco} (x${item.quantidade})</span>
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="alterarQuantidade('${item.nome}', -1)">-</button>
+                        <button class="quantity-btn" onclick="alterarQuantidade('${item.nome}', 1)">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="removerItem('${item.nome}')">Remover</button>
+                `;
+                listaPedido.appendChild(li);
+            });
+        }
+        
+
+        function enviarPedido() {
+            var telefone = '5511984370289';
+            var mensagem = 'Olá, gostaria de fazer o seguinte pedido:%0A';
+            var total = 0;
+        
+            itensPedido.forEach(function(item, index) {
+                mensagem += `${index + 1}. ${item.nome} (x${item.quantidade}) - R$${item.preco * item.quantidade}%0A`;
+                total += item.preco * item.quantidade;
+            });
+        
+            mensagem += `%0ATotal: R$${total}`;
+        
+            var url = 'https://api.whatsapp.com/send?phone=' + telefone + '&text=' + mensagem;
+            window.open(url, '_blank');
+        }
+        
+        
+    </script>
+
+    
+    
+</body>
+</html>
